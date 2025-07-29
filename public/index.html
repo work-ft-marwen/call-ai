@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIBotsAutomations - Plateforme Agent IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://sdk.twilio.com/js/voice/v2.11.1/twilio.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- Écran de Connexion -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+        <div class="max-w-md w-full bg-gray-800 rounded-2xl shadow-lg p-8 space-y-6">
+            <div class="flex justify-center mb-4"><img src="image.png" alt="Logo AutoBot AI" class="h-10"></div>
+            <h2 class="text-center text-2xl font-bold tracking-tight text-gray-100">Plateforme Agent Commercial IA</h2>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="email" class="sr-only">Adresse e-mail</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required value="marwen.belhadj@aibotsautomations.com" class="relative block w-full appearance-none rounded-lg border border-gray-700 bg-gray-900 px-3 py-3 text-white placeholder-gray-400 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" placeholder="Adresse e-mail">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Mot de passe</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required value="1234567890" class="relative block w-full appearance-none rounded-lg border border-gray-700 bg-gray-900 px-3 py-3 text-white placeholder-gray-400 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" placeholder="Mot de passe">
+                </div>
+                <div id="error-message" class="text-red-500 text-sm h-4"></div>
+                <div><button type="submit" class="group relative flex w-full justify-center rounded-lg border border-transparent bg-indigo-600 py-3 px-4 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900">Connexion</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Écran Principal de l'Application -->
+    <div id="app-screen" class="hidden min-h-screen">
+        <div class="flex flex-col h-screen">
+            <header class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3"><img src="image.png" alt="Logo AutoBot AI" class="h-8"></div>
+                <div class="flex items-center space-x-4">
+                    <span id="user-email" class="text-sm text-gray-300"></span>
+                    <button id="logout-button" class="text-sm text-gray-400 hover:text-white">Déconnexion</button>
+                </div>
+            </header>
+
+            <main class="flex-1 p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
+                <div class="lg:col-span-2 flex flex-col bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+                    <div class="p-4 border-b border-gray-700">
+                        <h2 class="text-lg font-semibold">Console de l'Agent IA</h2>
+                        <div id="call-status-bar" class="mt-2 p-2 bg-gray-700 rounded-lg flex items-center justify-between">
+                            <span id="call-status-text" class="text-sm font-medium text-gray-300">Prêt</span>
+                            <span id="call-timer" class="text-sm font-mono text-indigo-400">00:00</span>
+                        </div>
+                    </div>
+                    <div id="transcript" class="flex-1 p-4 space-y-4 overflow-y-auto scrollbar-thin">
+                         <!-- La transcription de l'appel apparaîtra ici -->
+                    </div>
+                     <div class="p-4 bg-gray-800/70 border-t border-gray-700">
+                        <div id="call-controls" class="flex items-center space-x-2">
+                             <input id="phone-number-input" type="tel" class="flex-1 bg-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="+216... (Numéro vérifié Twilio)">
+                             <button id="call-button" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg flex items-center space-x-2 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
+                                <span>Appeler</span>
+                            </button>
+                             <button id="hangup-button" class="hidden bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-lg flex items-center space-x-2 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m-2-4v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6a2 2 0 012-2h2.586a1 1 0 01.707.293l1.414 1.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l1.414-1.414A1 1 0 0116 4h0z"></path></svg>
+                                <span>Raccrocher</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="flex flex-col bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+                    <div class="p-4 border-b border-gray-700">
+                        <h3 class="font-semibold">Base de Connaissances</h3>
+                    </div>
+                    <div id="knowledge-base" class="flex-1 p-4 space-y-4 overflow-y-auto scrollbar-thin">
+                        <!-- Le contenu de la base de connaissances sera injecté par le script.js -->
+                    </div>
+                </aside>
+            </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
